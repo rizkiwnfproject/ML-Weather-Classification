@@ -12,6 +12,11 @@ Original file is located at
 - **ID Dicoding:** a123xbf441
 
 ## Import Semua Packages/Library yang Digunakan
+
+Dalam mengerjakan proyek ini, langkah awalnyaadalah mengimpor semua library yang diperlukan. Library-library ini digunakan untuk berbagai keperluan seperti:
+- manipulasi data (pandas, numpy),
+- visualisasi data (matplotlib, seaborn),
+- preprocessing, pembuatan serta evaluasi model machine learning (scikit-learn),
 """
 
 import pandas as pd
@@ -31,6 +36,11 @@ from sklearn.model_selection import train_test_split
 
 """## Data Understanding
 
+#### Informasi Dataset
+Dataset Weather Classification merupakan dataset yang berasal dari kaggle, dengan link berikut : https://www.kaggle.com/datasets/nikhil7280/weather-type-classification/data. Dataset ini kemudian saya download dan saya akses melalui komputer local dan saya simpan dengan nama weather_classification_data.csv.
+
+Dataset ini memiliki data sebanyak 13.200 baris data serta 11 kolom dan tidak memiliki missing value, namun terdapat outlier di beberapa fitur sehingga memerlukan penanganan yang lebih lanjut. Selanjutnya akan dilakukan proses preprocessing, dan data akan berkurang menjadi 11.586 baris data. Dataset ini memiliki beberapa kolom antara lain Temprature, Humidity, Wind Speed, Precipitation, Cloud Cover, Atmospheric Pressure, UV Index, Season, Visibility, Location, dan Weather type.
+
 Baris kode dibawah ini digunakan untuk membaca file CSV bernama weather_classification_data.csv. File CSV tersebut berisi dataset cuaca yang akan digunakan untuk analisis atau pemodelan. Hasil pembacaan disimpan dalam variabel df (dataframe). Kemudian menggunakan head() untuk menampilkan 5 baris pertama dari dataframe df. Ini berguna untuk melihat struktur awal data, seperti nama kolom, tipe data, dan isi dari beberapa baris awal.
 """
 
@@ -38,7 +48,8 @@ df = pd.read_csv("weather_classification_data.csv")
 print("Dataset Shape:", df.shape)
 print(df.head())
 
-"""Descriptive merupakan fungsi yang digunakan untuk menghasilkan statistik deskriptif dari kolom-kolom numerik di dalam dataframe df.
+"""#### Penjelasan setiap Kolom
+Descriptive merupakan fungsi yang digunakan untuk menghasilkan statistik deskriptif dari kolom-kolom numerik di dalam dataframe df.
 Statistik yang ditampilkan mencakup:
 - count: jumlah nilai yang tidak kosong (non-NaN),
 - mean: nilai rata-rata,
@@ -46,11 +57,81 @@ Statistik yang ditampilkan mencakup:
 - min: nilai minimum,
 - 25%, 50%, 75%: kuartil 1, median, dan kuartil 3,
 - max: nilai maksimum.
+
+Pada data ini, terdapat 13.200 baris data, kemudian untuk penjelasan perfitur antara lain :
+1. Temperature (°C)
+    - Rata-rata: 19,13°C
+    - Minimum: -25°C
+    - Maksimum: 109°C
+    - Rentang suhu ini menunjukkan adanya outlier, karena suhu maksimum 109°C dan tidak mungkin terjadi dalam kondisi cuaca normal di berbagai sehingga perlu dibersihkan dalam tahap preprocessing.
+
+2. Humidity (%)
+    - Rata-rata: 68,71%
+    - Minimum: 20%
+    - Maksimum: 109%
+    - Kelembapan udara tidak mungkin melebihi 100%, sehingga nilai maksimum ini juga merupakan outlier dan tidak mungkin terjadi dalam kondisi normal di berbagai sehingga perlu dibersihkan dalam tahap preprocessing.
+
+3. Wind Speed (km/h)
+    - Rata-rata: 9,83 km/h
+    - Minimum: 0 km/h
+    - Maksimum: 48,5 km/h
+    - Kecepatan angin terlihat wajar, dengan nilai maksimum masih berada dalam rentang yang nyata untuk kondisi cuaca biasa.
+
+4. Precipitation (%)
+    - Rata-rata: 53,64%
+    - Minimum: 0%
+    - Maksimum: 109%
+    - Curah hujan dalam bentuk persentase tidak mungkin melebihi 100%, sehingga nilai maksimum ini juga merupakan outlier dan tidak mungkin terjadi dalam kondisi normal di berbagai sehingga perlu dibersihkan dalam tahap preprocessing.
+
+5. Atmospheric Pressure (hPa)
+    - Rata-rata: 1005,83 hPa
+    - Minimum: 800,12 hPa
+    - Maksimum: 1199,21 hPa
+    - Tekanan atmosfer ini berada dalam rentang yang normal untuk kondisi permukaan laut.
+
+6. UV Index
+    - Rata-rata: 4,01
+    - Minimum: 0
+    - Maksimum: 14
+    - Nilai indeks UV maksimum 14 menunjukkan paparan sinar UV yang sangat tinggi.
+
+7. Visibility (km)
+    - Rata-rata: 5,46 km
+    - Minimum: 0 km
+    - Maksimum: 20 km
+    - Tingkat visibilitas tampak realistis, dengan rata-rata penglihatan sekitar 5,5 km.
 """
 
 print("\nDescriptive Statistics:\n", df.describe())
 
-"""Mengambil semua nama kolom dari dataframe df lalu menghitung berapa banyak baris dan kolom grid yang dibutuhkan agar semua fitur bisa divisualisasikan dalam 4 subplot. Kemudian membuat figure dan axes menggunakan matplotlib, lalu mengubah susunannya agar mudah diakses satu per satu. Dilakukan iterasi untuk setiap kolom dan dibuatkan histogramnya dengan judul masing-masing setiap diagramnya agar mudah untuk dibaca."""
+"""#### Visualisasi Data
+Mengambil semua nama kolom dari dataframe df lalu menghitung berapa banyak baris dan kolom grid yang dibutuhkan agar semua fitur bisa divisualisasikan dalam 4 subplot. Kemudian membuat figure dan axes menggunakan matplotlib, lalu mengubah susunannya agar mudah diakses satu per satu. Dilakukan iterasi untuk setiap kolom dan dibuatkan histogramnya dengan judul masing-masing setiap diagramnya agar mudah untuk dibaca.
+
+Berdasarkan visualisasi histogram, terdapat penjelasan seperti berikut :
+1. Temperature (°C) : Distribusi suhu menunjukkan naik turun, dengan beberapa puncak, hal ini kemungkinan berkaitan dengan musim yang berbeda. Namun, terdapat nilai ekstrem hingga >100°C, yang mengindikasikan outlier.
+
+2. Humidity (%) : Sebagian besar nilai berada di antara 40% hingga 100%, Distribusi terlihat terdapat outlier yang >100% yang perlu ditangani.
+
+3. Wind Speed (km/h) : Distribusinya skewed ke kanan (positif), artinya sebagian besar nilai kecepatan angin rendah (<10 km/h). Tidak terdapat outlier.
+
+4. Precipitation (%) : Distribusinya cukup merata, namun terdapat banyak nilai tinggi yang diatas 100% sehingga perlu dibersihkan.
+
+5. Cloud Cover : Kategori 'clear', 'partly cloudy', dan 'overcast' terlihat banyak, namun untuk 'cloudy' sedikit.
+
+6. Atmospheric Pressure (hPa) : Distribusinya mendekati normal dan simetris di sekitar 1000 hPa.
+
+7. UV Index : Distribusinya sangat skewed ke kanan, dengan mayoritas nilai UV Index rendah (0–5). Ini normal karena sinar UV biasanya intens hanya pada siang hari atau musim panas.
+
+8. Season : Musim Winter mendominasi data, jumlah datanya jauh lebih banyak dibanding musim lain.
+
+9. Visibility (km) : Distribusinya skewed ke kanan, mayoritas nilai berada di bawah 10 km. Ada sedikit data yang menunjukkan visibilitas sangat tinggi hingga 20 km.
+
+10. Location : Kategori 'inland', 'mountain', dan 'coastal' memiliki jumlah data yang cukup seimbang.
+
+11. Weather Type : Kategori cuaca 'Rainy', 'Cloudy', 'Sunny', dan 'Snowy' memiliki distribusi seimbang.
+
+
+"""
 
 cols = df.columns.to_list()
 n_cols = 4
@@ -71,9 +152,14 @@ for j in range(i + 1, len(axes)):
 plt.tight_layout()
 plt.show()
 
-cols
+"""#### Pengecekan korelasi antar fitur
+Langkah ini digunakan untuk membuat visualisasi korelasi antara fitur numerik dalam dataset, dalam bentuk heatmap. Dengan adanya langkah ini, dapat mengetahui fitur mana yang saling berkorelasi tinggi atau sangat berhubungan.
 
-"""Langkah ini digunakan untuk membuat visualisasi korelasi antara fitur numerik dalam dataset, dalam bentuk heatmap. Dengan adanya langkah ini, dapat mengetahui fitur mana yang saling berkorelasi tinggi atau sangat berhubungan."""
+Terdapat beberapa korelasi antara lain :
+- yang cukup kuat : Humidity dengan Precipitation (0.64), Humidity dengan Wind Speed (0.41), Precipitation dengan Wind Speed (0.44), Temperature dengan UV Index (0.37), Visibility dengan UV Index (0.36)
+- yang cukup lemah : Humidity dengan Visibility (–0.48), Precipitation dengan Visibility (–0.46), Humidity dengan UV Index (–0.34), Temperature dengan Wind Speed (–0.07), Wind Speed dengan UV Index (–0.07).
+
+"""
 
 df_selected = df[['Temperature', 'Humidity', 'Wind Speed', 'Precipitation (%)','Atmospheric Pressure','Visibility (km)', 'UV Index']]
 plt.figure(figsize=(10, 8))
@@ -82,7 +168,18 @@ plt.title('Heatmap Korelasi antar Fitur')
 plt.tight_layout()
 plt.show()
 
-"""Langkah ini digunakan untuk mengecek outlier dari fitur numerik dalam dataset menggunakan boxplot, yaitu jenis grafik statistik yang sangat efektif untuk mendeteksi nilai ekstrem. Outlier penting untuk diidentifikasi karena dapat memengaruhi rata-rata atau model machine learning."""
+"""#### Pengecekan Outlier
+Langkah ini digunakan untuk mengecek outlier dari fitur numerik dalam dataset menggunakan boxplot, yaitu jenis grafik statistik yang sangat efektif untuk mendeteksi nilai ekstrem. Outlier penting untuk diidentifikasi karena dapat memengaruhi rata-rata atau model machine learning.
+
+Hasil dari visualisasi data sebagai berikut :
+1. Temperature : Terdapat banyak Outlier di sisi kanan (>60°C).
+2. Humidity : Tidak terdapat outlier signifikan. Distribusi cukup normal antara 20–100%.
+3. Wind Speed : Banyak outlier >30 km/h.
+4. Precipitation (%) : Distribusi cenderung normal.
+5. Atmospheric Pressure : Terdapat banyak outlier di kedua sisi.
+6. UV Index : Distribusi sedikit miring ke kanan, tapi tidak ada outlier ekstrem.
+7. Visibility (km) : Outlier jelas terlihat di atas 12–13 km.
+"""
 
 cols = [
     'Temperature',
@@ -105,22 +202,28 @@ for i, col in enumerate(cols):
 plt.tight_layout()
 plt.show()
 
-"""## Data Preparation
+"""#### Pengecekan Tipe Data
+- Kode ini digunakan untuk mengecek atau memeriksa tipe data dari setiap kolom yang ada di variabel df, dan terdapat 3 tipe data yaitu float, int, dan object.
+- untuk float dan int masuk ke numerik antara lain : Temperature, Humidity, Wind Speed, Precipitation (%), Atmospheric Pressure, UV Index, Visibility (km).
+- sedangkan untuk objek masuk ke kategorikal antara lain : Cloud Cover, Season, Location, Weather Type.
+"""
 
-### Data Preprocessing
+data_types = df.dtypes
+print(data_types)
 
-Kode ini digunakan untuk mengecek apakah di dalam kolom yang ada di df terdapat missing value, kemudian di print atau ditampilkan
+"""#### Pengecekan Missing Value
+- Kode ini digunakan untuk mengecek apakah di dalam kolom yang ada di df terdapat missing value, kemudian di print atau ditampilkan.
+- Hasilnya adalah tidak ada data yang kosong atau missing value
 """
 
 missing_values = df.isnull().sum()
 print(missing_values)
 
-"""Kode ini digunakan untuk mengecek atau memeriksa tipe data dari setiap kolom yang ada di variabel df, dan terdapat 3 tipe data yaitu float, int, dan object."""
+"""## Data Preparation
 
-data_types = df.dtypes
-print(data_types)
+### Data Preprocessing
 
-"""#### Menghapus Outlier Data
+#### Menghapus Outlier Data
 
 Kode ini mendefinisikan dan menerapkan fungsi untuk menghapus outlier dari dataset menggunakan metode IQR (Interquartile Range), yaitu salah satu metode paling umum dalam statistik. Untuk menghapusnya sendiri seperti menghapus baris-baris yang mengandung nilai outlier pada kolom-kolom yang ditentukan, berdasarkan rumus IQR. Jika sebelum dihapus datanya ada 13.200 setelah dihapus outliernya datanya menjadi 11586.
 """
@@ -138,6 +241,8 @@ def remove_outliers_iqr(df, columns):
 df_cleaned = remove_outliers_iqr(df, cols)
 
 print("Data setelah menghapus outlier:", df_cleaned.shape)
+
+"""Dan setelah dilakukan pembersihan data, pembersihan ini berhasil menghilangkan sebagian besar nilai ekstrem tanpa menghilangkan variasi data.Penanganan dilakukan secara baik sehingga tidak merusak representasi data."""
 
 cols = [
     'Temperature',
@@ -160,7 +265,9 @@ for i, col in enumerate(cols):
 plt.tight_layout()
 plt.show()
 
-"""Kode di bawah ini digunakan untuk mengubah data kategorikal menjadi data numerik agar bisa digunakan dalam algoritma machine learning yang hanya menerima input angka. Kolom-kolom 'Weather Type', 'Season', 'Location', dan 'Cloud Cover' dikodekan ke bentuk numerik. Di sini digunakan Label Encoding dari scikit-learn, yang mengubah setiap nilai unik menjadi angka (misalnya: ['Sunny', 'Rainy', 'Cloudy'] jadi [2, 1, 0])."""
+"""#### Label Encoding (Fitur Kategorikal)
+Kode di bawah ini digunakan untuk mengubah data kategorikal menjadi data numerik agar bisa digunakan dalam algoritma machine learning yang hanya menerima input angka. Kolom-kolom 'Weather Type', 'Season', 'Location', dan 'Cloud Cover' dikodekan ke bentuk numerik. Di sini digunakan Label Encoding dari scikit-learn, yang mengubah setiap nilai unik menjadi angka (misalnya: ['Sunny', 'Rainy', 'Cloudy'] jadi [2, 1, 0]).
+"""
 
 label_cols = ['Weather Type', 'Season', 'Location', 'Cloud Cover']
 le = LabelEncoder()
@@ -168,24 +275,53 @@ le = LabelEncoder()
 for col in label_cols:
     df_cleaned[col] = le.fit_transform(df_cleaned[col])
 
-"""Kode ini digunakan untuk memisahkan fitur (X) dan target (y), lalu membagi data menjadi data latih dan data uji — langkah penting dalam proses pembuatan model machine learning."""
+"""Kode ini digunakan untuk memisahkan fitur (X) dan target (y), lalu membagi data menjadi data latih dan data uji — langkah penting dalam proses pembuatan model machine learning. Untuk proyek ini pembagian data training dan testingnya adalah 80% dan 20%."""
 
 X = df_cleaned.drop('Weather Type', axis=1)
 y = df_cleaned['Weather Type']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-"""Kode ini menggunakan MinMaxScaler dari library scikit-learn untuk menstandarisasi atau menskalakan fitur dalam dataset agar berada dalam rentang tertentu, biasanya antara 0 dan 1."""
+"""#### Feature Scalling
+Kode ini menggunakan MinMaxScaler dari library scikit-learn untuk menstandarisasi atau menskalakan fitur dalam dataset agar berada dalam rentang tertentu, biasanya antara 0 dan 1 sehingga data dapat diolah dengan menggunakan metode yang ditentukan.
+"""
 
 scaler = MinMaxScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
+
+"""Berikut merupakan contoh data dari X_trainnya berada di rentang 0 hingga 1"""
 
 X_train
 
 """## Modelling
 
 Kode ini digunakan untuk membuat sebuah dictionary bernama models yang berisi tiga model machine learning berbeda. Setiap model diinisialisasi dengan parameter tertentu. Model yang digunakan antara lain : Logistic Regression, Decision Tree, XGBoost.
+
+1. Logistic Regression :
+
+
+    bekerja dengan mengklasifikasikan berdasarkan probabilitas dari kelas target menggunakan fungsi sigmoid. Seperti memperkirakan kemungkinan suatu peristiwa terjadi, contoh : tipe cuaca seperti rainy, cloudy, dll berdasarkan dataset variabel yang diberikan. Untuk kasus ini adalah klasifikasi multikelas. Logistic Regression bekerja dengan mengestimasi koefisien untuk setiap fitur, dan membuat prediksi berdasarkan kombinasi linier dari fitur-fitur tersebut.
+
+    Dengan Parameter max_iter=1000: untuk menentukan jumlah maksimum iterasi dalam proses optimasi. Nilai ini diperbesar dari default untuk memastikan konvergensi model.
+
+    Kelebihan dari Logistic Regression adalah Sederhana dan cepat dilatih, selain itu mudah untuk diinterpretasikan. Sedangkan kekurangannya adalah Kurang cocok untuk data dengan hubungan non-linear yang kompleks.
+
+2. Decision Tree :
+
+    Dikarenakan Decision Tree adalah algoritma klasifikasi berbasis pohon maka algoritma ini bekerja dengan membagi data berdasarkan fitur-fitur tertentu menggunakan metrik. Proses pembentukan pohon dilakukan secara rekursif dengan memilih fitur dan nilai threshold terbaik pada setiap node, hingga mencapai kondisi tertentu seperti maksimum kedalaman atau jumlah minimum sampel. Proses dimulai dengan memilih fitur terbaik sebagai awal, lalu membuat cabang berdasarkan nilai-nilai fitur tersebut. Pada setiap cabang, model kembali memilih fitur terbaik dari subset data dan membagi lagi, hingga mencapai node akhir (leaf) yang menentukan kelas tipe cuaca dengan cara tersebut.
+
+    Disini saya tidak mengatur apapun untuk parameter, sehingga saya membiarkan untuk default.
+
+    Kelebihan dari Decision Tree adalah kemudahan visualisasi dan pemahaman terhadap proses pengambilan keputusan yang dilakukan oleh model. sedangkan kekurangannya adalah Rentan terhadap overfitting.
+
+3. XGBoost Classifier :
+
+    Dikarenakan XGBoost adalah algoritma ensemble yang membangun model prediktif secara bertahap maka akan memprediksi tipe cuaca dengan membangun serangkaian pohon keputusan secara bertahap, di mana setiap pohon baru dibuat untuk memperbaiki kesalahan prediksi dari pohon-pohon sebelumnya. Proses yang disebut boosting ini merupakan proses di mana model belajar dari kesalahan residual sebelumnya dan memperkuat prediksi dengan penyesuaian bobot. Proses ini diulang hingga mencapai jumlah pohon tertentu dan hasil akhir prediksi cuaca seperti rainy, cloudy diperoleh dari gabungan prediksi seluruh pohon. Dengan teknik ini, XGBoost sangat efektif dalam menangani pola cuaca yang kompleks dan data yang tidak linear.
+
+    Dengan Parameter use_label_encoder=False digunakan untuk menonaktifkan encoder label default XGBoost agar kompatibel dengan sklearn. eval_metric='mlogloss' digunakan untuk mengukur performa klasifikasi multikelas dengan log loss.
+
+    Kelebihan dari XGBoost adalah Performa tinggi, sangat baik untuk data kompleks. sedangkan kekurangannya adalah Butuh tuning parameter untuk performa optimal.
 """
 
 models = {
@@ -207,7 +343,25 @@ for name, model in models.items():
 
 """### Evaluasi
 
-Kode ini melakukan evaluasi untuk setiap model yang telah dilatih, dengan menampilkan laporan klasifikasi dan confusion matrix. Pertama, untuk setiap model, kode ini mengambil hasil prediksi dan model yang telah dilatih. Kemudian, menampilkan laporan klasifikasi (precision, recall, F1-score) dengan menggunakan classification_report, serta confusion matrix untuk melihat distribusi prediksi dan kesalahan klasifikasi. Confusion matrix ditampilkan dalam bentuk plot dengan label yang sesuai. Hasil evaluasi ini memberikan gambaran lengkap mengenai kinerja tiap model pada data uji.
+#### Matriks
+
+Kode ini melakukan evaluasi untuk setiap model yang telah dilatih, dengan menampilkan laporan klasifikasi dan confusion matrix. Pertama, untuk setiap model, kode ini mengambil hasil prediksi dan model yang telah dilatih. Kemudian, menampilkan laporan klasifikasi (precision, recall, F1-score) dengan menggunakan classification_report serta confusion matrix untuk melihat distribusi prediksi dan kesalahan klasifikasi. Confusion matrix ditampilkan dalam bentuk plot dengan label yang sesuai. Hasil evaluasi ini memberikan gambaran lengkap mengenai kinerja tiap model pada data uji.
+
+penjelasan untuk metrik antara lain :
+1. accuracy digunakan untuk memprediksi yang benar terhadap seluruh data.
+2. precision digunakan untuk memprediksi benar positif dibandingkan dengan keseluruhan hasil yang diprediksi positif
+3. recall digunakan untuk melihat seberapa baik model dalam menangkap semua instance dari tiap kelas
+4. f1-score digunakan dengan meratakan precision dan recall, berguna untuk menyeimbangkan keduanya.
+
+Dengan adanya metrik dapat digunakan untuk memprediksi tidak hanya akurat secara keseluruhan, tetapi juga seimbang dalam mengenali semua jenis kondisi cuaca, termasuk yang jarang terjadi.
+
+#### Hasil Evaluasi Model
+
+1. Logistic Regression : Memiliki Akurasi total 94%, sehingga model ini memberikan kinerja yang konsisten pada keempat kelas, namun sedikit lebih rendah pada kelas 3. Logistic Regression bekerja dengan menghitung probabilitas setiap kelas menggunakan fungsi logit (sigmoid). Model ini cocok untuk klasifikasi linier dan menghasilkan decision boundary linier.
+
+2. Decision Tree : Memiliki Akurasi total 97%, Sehingga Decision Tree menunjukkan performa sangat baik secara merata di semua kelas, dengan presisi dan recall tinggi. Decision Tree membuat pohon keputusan berdasarkan fitur yang memberikan information gain tertinggi pada setiap split. sehingga dapat menangani data numerik dan kategorikal serta membentuk model non-linier.
+
+3. XGBoost : Memiliki Akurasi total 97%, Sehingga XGBoost memberikan performa tertinggi dan sangat stabil, terutama dalam menangani semua kelas dengan sangat baik.
 """
 
 for name in trained_models:
@@ -227,10 +381,10 @@ for name in trained_models:
     plt.title(f'Confusion Matrix - {name}')
     plt.show()
 
-"""## Hasil
+"""#### Model Paling Unggul
 
-Hasil evaluasi menunjukkan bahwa ketiga model (Logistic Regression, Decision Tree, dan XGBoost) memiliki kinerja yang sangat baik.
-- Logistic Regression memiliki akurasi 94%, dengan precision, recall, dan F1-score yang konsisten tinggi di seluruh kelas, meskipun sedikit lebih rendah dibandingkan Decision Tree dan XGBoost.
-- Decision Tree dan XGBoost keduanya memiliki akurasi 97%, dengan precision, recall, dan F1-score yang hampir sempurna di semua kelas.
-- XGBoost sedikit lebih unggul dalam precision untuk beberapa kelas. Secara keseluruhan, Decision Tree dan XGBoost memberikan kinerja terbaik dengan nilai yang sangat mirip, namun XGBoost sedikit lebih baik dalam beberapa metrik.
+Hasil evaluasi menunjukkan bahwa ketiga model (Logistic Regression, Decision Tree, dan XGBoost) memiliki kinerja yang sangat baik. Namun, XGBoost menjadi model terbaik untuk menjawab problem statement yang telah dirumuskan sebelumnya:
+- Model ini menjawab kebutuhan akan akurasi tinggi dan konsistensi prediksi di semua jenis kondisi cuaca.
+- Semua goals seperti akurasi tinggi, stabil di seluruh kelas tercapai.
+- Solusi yang diusulkan dapat berdampak nyata dan bisa diintegrasikan dengan sistem lainnya.
 """
